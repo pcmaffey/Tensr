@@ -1,0 +1,26 @@
+
+<template name="field">
+  <div class="fieldBox">
+        <div class="field">
+              	{{#each spaces}}
+                  {{> space}}
+                {{/each}}
+        </div>
+  </div>
+
+</template>
+
+
+<template name="space">
+
+  <div class="space {{edge}} {{me}}" id="{{_id}}" data-x="{{location.x}}" data-y="{{location.y}}">
+    {{#if selectCell}}
+      <div class="selectCell"></div>
+    {{/if}}
+
+    {{#if isCell}}
+      <div class="{{teamName}}Cell cell" id={{cellId}}>{{{isMe}}}</div>
+    {{/if}}
+  </div>
+
+</template>

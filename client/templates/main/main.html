@@ -1,0 +1,95 @@
+<head>
+  <title>Tensr</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='http://fonts.googleapis.com/css?family=Montserrat|Righteous' rel='stylesheet' type='text/css'>
+  <link rel="shortcut icon" href="img/fav.ico">
+</head>
+
+<body>
+
+{{> info team="yin"}}
+
+{{> field}}
+
+{{#with getMessage}}
+  {{> Template.dynamic template=template}}
+{{/with}}
+
+{{> info team="yang"}}
+
+</body>
+
+
+<template name="info">
+  <!--Pass team name and render appropriate styles / data. -->
+
+  <div class="{{team}} info">
+
+    <div class="score"><div class="inner">{{score team}}</div></div>
+    <div class="alive">
+      {{alive team}}<br> <label>Alive</label>
+    </div>
+    <div class="spirits">
+      {{getSpirits team}}<br> <label>Spirits</label>
+    </div>
+
+  </div>
+
+</template>
+
+
+
+<template name="drop">
+  <!--Dialogue to confirm player wants to drop their cell -->
+    <div class="message {{teamName}}Message">
+      <h1>Drop cell?</h1>
+      <p><em>Your cell will stop moving and you can rejoin the game as a new cell</em></p>
+        <a href=""><div class="button yes">Yes</div></a>
+        <a href=""><div class="button no">No</div></a>
+    </div>
+</template>
+
+<template name="gameOver">
+  <!--Team wins. Pass team name as data. Ask to play again? -->
+
+</template>
+
+<template name="newSpirit">
+  <!--Show this message when a player first joins the game. Unless they are are the only 1 -->
+  <div class="message {{teamName}}Message">
+    <h1>{{getSpirits this.team}}</h1>
+      <p>You are now a spirit for {{teamName}} team in {{teamColor}}.</p>
+
+      <p><em>Your cell will be born when you're in position #1 and an opponent is ready. Quickly choose where to play your cell.
+        Move around the field to stay alive and devour {{opponent}} cells by surrounding them with your team!</em></p>
+      <a href=""><div class="button">Ok, got it!</div></a><br>
+      <a href="http://www.tensr.com#howtoplay" target="_blank">Learn how to play</a>
+  </div>
+</template>
+
+<template name="spirit">
+  <!--Deprecated...Show this message when a player becomes a spirit (other than first time) -->
+  <div class="message {{teamName}}Message">
+    <h1>{{getSpirits this.team}}</h1>
+      <p>Play another cell quickly when it's your turn (and an opponent is ready).</p>
+
+      <a href=""><div class="button">Ok, got it!</div></a><br>
+      <a href="http://www.tensr.com#howtoplay" target="_blank">Learn how to play</a>
+
+  </div>
+</template>
+
+<template name="waiting">
+  <!--Show this message when waiting for opponent... -->
+  <div class="smallMessage {{teamName}}Message">
+      Waiting for opponent...
+  </div>
+</template>
+
+<template name="timer">
+  <!--Show this message once both are ready and timer has started... -->
+  <div class="smallMessage {{teamName}}Message">
+      Playing your cell in... {{countdown}}
+  </div>
+</template>
