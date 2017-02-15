@@ -1,42 +1,69 @@
-Template.body.onCreated( function () {
-  var self = this;
-  self.autorun(function () {
-  self.subscribe("messages");
+Template.game.onCreated( function () {
+    var self = this;
+    self.autorun(function () {
+    self.subscribe("messages", FlowRouter.getParam("_id"));
+    var gameSub = self.subscribe("games", FlowRouter.getParam("_id"));
 
-  var gameSub = self.subscribe("games");
   if (gameSub.ready()) {
     var game = Games.findOne({});
     if (game) {
-      Session.set("fieldSize", game.fieldSize);
-      Session.set("gameId", game._id);
 
+      Session.set("fieldSize", game.fieldSize);
       var playSub = self.subscribe("play", game._id);
       if (playSub.ready()) {
-        var play = Play.findOne({playerId: Meteor.userId()});
+          var play = Play.findOne({playerId: Meteor.userId()});
 
-        if (play) {
-          Session.set("team", play.team);
-          Session.set("state", play.state);
-          Session.set("stateUpdatedAt", play.stateUpdatedAt);
-          if (play.state != 0) {
-            Session.set("selectCell", false);
+          //check if game ended
+          if (! game.endedAt) {
+
+            if (play) {
+              Session.set("team", play.team);
+              Session.set("state", play.state);
+              Session.set("stateUpdatedAt", play.stateUpdatedAt);
+            };
+
+          } else {
+          //show game over for a player... with winner / loser message (don't have to do anything?)
+          //also, show game over for someone who didn't play, but comes to the game, possibly from an invite link
+            if (! play) {
+                FlowRouter.go("/like/tears/in/rain");
+
+            } else {
+              if (! play.connId) {
+                FlowRouter.go("/like/tears/in/rain");
+
+              };
+              Session.set("state", 9); //use this for game ended...
+            };
           };
-        };
       };
+    } else {
+      FlowRouter.go("/like/tears/in/rain");
     };
   };
 
   });
   });
 
-Template.body.onRendered( function () {
+Template.game.onRendered( function () {
   //run view() within reactive autorun
   Meteor.autorun(function () {
     view()
     });
+
+  $(window).on('keydown', function(e){
+    if (e.which == 189) {
+      //zoom out
+      zoom(-1);
+      return false;
+    } else if (e.which == 187) {
+      zoom(1);
+      return false;
+    };
+  });
   });
 
-Template.body.helpers({
+Template.game.helpers({
 
   getMessage: function () {
     //Determine if a message exists and pass state to template to render that message
@@ -52,6 +79,13 @@ Template.body.helpers({
     };
   }
 });
+
+Template.tensr.events({
+  "click .gameMenu": function (e) {
+    e.preventDefault();
+    FlowRouter.go("/");
+  }
+  })
 
 
 Template.registerHelper('getSpirits', function(team) {
@@ -70,21 +104,11 @@ Template.registerHelper('getSpirits', function(team) {
         var players = Play.find({state: 0, team: Session.get("team"), stateUpdatedAt: {$lte: Session.get("stateUpdatedAt")}}).count();
           if (players) {
             spirits =  players + " of " + game.spirits[team];
-
-            //It's your turn!
             if (players == 1) {
-              //hide message unless the only one in queue
-              if (game.spirits[team] > 1) {
-                Meteor.call("readMessage", Template.instance().data.template);
-              };
-              //both players must be ready
-              if (game.spirits[oTeam] > 0) {
-                Session.set("selectCell", true);
-              }
+              Session.set("spiritOrder", false);
             } else {
-              Session.set("selectCell", false);
-            };
-
+              Session.set("spiritOrder", true);
+            }
           };
 
     };
@@ -94,11 +118,11 @@ Template.registerHelper('getSpirits', function(team) {
 
 
 Template.info.helpers({
-alive: function (team) {
+players: function (team) {
   //get # of active cells in game
   game = Games.findOne({});
     if (game) {
-      return game.activeCells[team];
+      return game.players[team];
     };
 },
 score: function (team) {
@@ -113,37 +137,37 @@ score: function (team) {
 });
 
 
-Template.newSpirit.helpers({
 
-  teamColor: function () {
-    var color = "black";
-    if (Template.instance().data.team == 1) {color = "white"};
-    return color;
-  },
+  Template.welcome.events({
+    "click .cell": function (e) {
+     e.preventDefault();
+     var team;
+     if($(e.target).hasClass("yinCell") || $(e.target).parent().hasClass("yinCell")) {
+       team = 0;
+       Meteor.call("joinGame", FlowRouter.getParam("_id"), true, team);
+     } else if($(e.target).hasClass("yangCell") || $(e.target).parent().hasClass("yangCell")) {
+       team = 1;
+       Meteor.call("joinGame", FlowRouter.getParam("_id"), true, team);
+     }
 
-  opponent: function () {
-    var opp = "Yang's white";
-    if (Template.instance().data.team == 1) {color = "Yin's black"};
-    return opp;
-  }
-});
-
-Template.newSpirit.events({
-  "click .button": function (e) {
-   e.preventDefault();
-   Meteor.call("readMessage", Template.instance().data.template);
-  }
-  });
+     return false;
+    }
+    });
 
   Template.drop.events({
     "click .yes": function (e) {
      e.preventDefault();
+     if (Session.get("state") != 1) {return false;}
      Meteor.call("drop", Session.get("activeCellId"));
+
+     return false;
     },
 
     "click .no": function (e) {
      e.preventDefault();
-     Meteor.call("readMessage", Template.instance().data.template);
+     Meteor.call("readMessage", FlowRouter.getParam("_id"), Template.instance().data.template);
+
+     return false;
     }
   });
 
@@ -160,10 +184,134 @@ Template.timer.helpers({
   countdown: function () {
     var game = Games.findOne({});
       if (game) {
-        var time = 3000 - game.timer;
+        var time = 5000 - game.timer;
         return Math.round(time / 1000);
       } else {
         return false;
       };
   }
   });
+
+Template.controls.helpers({
+  gameName: function () {
+    var game = Games.findOne({});
+      if (game) {
+        return game.name;
+      }
+      return false;
+    }
+  })
+
+
+  Template.controls.events({
+    "click .fa-arrows": function (e) {
+      e.preventDefault();
+      $(".control").toggle(100);
+      if ($(".fa-arrows").css("opacity") == "1") {
+        $(".fa-arrows").css({"opacity":.4});
+      } else {
+        $(".fa-arrows").css({"opacity":1});
+      };
+
+      return false;
+    },
+
+    "click .fa-arrow-down": function (e) {
+      e.preventDefault();
+      move(3);
+
+      return false;
+    },
+
+    "click .fa-arrow-up": function (e) {
+      e.preventDefault();
+      move(1);
+
+      return false;
+    },
+
+    "click .fa-arrow-right": function (e) {
+      e.preventDefault();
+      move(2);
+    },
+
+    "click .fa-arrow-left": function (e) {
+      e.preventDefault();
+      move(4);
+
+      return false;
+    },
+
+    "click .fa-tint": function (e) {
+      e.preventDefault();
+      if (Session.get("state") != 1) {return false;}
+
+      Meteor.call("setMessage", FlowRouter.getParam("_id"), "drop", Session.get("team"));
+
+      return false;
+    },
+
+    "click .fa-search-minus": function (e) {
+      e.preventDefault();
+      zoom(-1);
+
+      return false;
+    },
+
+    "click .fa-search-plus": function (e) {
+      e.preventDefault();
+      zoom(1);
+
+      return false;
+    },
+
+    "click .fa-sign-out": function (e) {
+      e.preventDefault();
+      FlowRouter.go("/");
+
+      return false;
+    }
+
+  });
+
+  Template.welcome.helpers({
+    getTeam: function () {
+      var team = {};
+      var game = Games.findOne({});
+        if (game) {
+          if (game.players.yin > game.players.yang) {
+            //yang
+            team = {"yin": false, "yang":true};
+          } else if (game.players.yin < game.players.yang) {
+            //yin
+            team = {"yin": true, "yang":false};
+          } else {
+            //choose
+            team = {"yin": false, "yang":false};
+          };
+          return team;
+        };
+        return false;
+    }
+    });
+
+Template.registerHelper("getUrl", function(){
+    return window.location.href;
+});
+
+Template.waiting.events({
+  "click .share": function (e) {
+    $(".shareUrl").toggle();
+  },
+
+  "click .closeMessage": function (e) {
+    $(".smallMessage").toggle();
+    return false;
+  }
+  });
+
+Template.waiting.helpers({
+  spiritOrder: function () {
+    return Session.get("spiritOrder");
+  }
+  })

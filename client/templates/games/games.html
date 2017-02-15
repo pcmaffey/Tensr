@@ -1,0 +1,35 @@
+<template name="games">
+  <div class="container">
+  <div class="logo-blue">
+    <img src="/img/logo-blue.svg">
+  </div>
+
+<p><em>Select a game to start playing:</em></p>
+
+    {{#each games}}
+      {{> joinGame}}
+    {{/each}}
+
+    <div class="newGame game">
+      <div class="insideGame">
+        <i class="fa fa-plus-square-o"></i>
+        <h2>New game</h2>
+        <br>
+      </div>
+    </div>
+
+</div>
+</template>
+
+<template name="joinGame">
+  <div class="game">
+    <div class="insideGame">
+
+      <h2>{{name}}</h2>
+      <em>{{playerCount}} players</em>
+
+    </div>
+      <div class="gameScore">{{devouredCells.yang}} <div class="cell yinCell"></div></div>
+      <div class="gameScore">{{devouredCells.yin}} <div class="cell yangCell"></div></div>
+  </div>
+</template>

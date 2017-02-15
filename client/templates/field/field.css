@@ -21,7 +21,7 @@ white-space: nowrap;
   position:relative;
 
   disply: block;
-  cursor: pointer;
+  cursor: crosshair;
   float: left;
   width: 10em;
   height: 10em;
@@ -133,7 +133,7 @@ white-space: nowrap;
   position: relative;
   z-index: 9999;
   -webkit-transform: translate3d(0,0,0);
-
+  cursor: crosshair;
   transition-timing-function: linear;
   transition-duration: 200ms;
   transition-property: opacity;
@@ -145,7 +145,17 @@ white-space: nowrap;
 }
 
 .selectCell:active {
-  opacity: .9;
+  opacity: 1;
+}
+
+.selected {
+  opacity: .5 !important;
+  background-color: rgba(82, 88, 255, .5);
+
+}
+
+.me {
+  cursor: pointer;
 }
 
 .nucleus {
@@ -155,21 +165,52 @@ white-space: nowrap;
   opacity: .75;
 }
 
+
+
+.fadeIn {
+  opacity: 0;
+  animation-name: fade;
+	animation-fill-mode:forwards;
+  animation-duration: 300ms;
+}
+
+@keyframes fade{
+   0% { opacity: 0;  }
+  100% { opacity: 100;  }
+}
+
 .yangCell .nucleus {
   margin: 3.3em 0 0 3.5em;
   background-color: rgba(255, 78, 1, 1);
   border: 1px solid rgba(255, 78, 1, .75);
-  box-shadow: inset .1em .1em 0 .2em rgba(255, 255, 255, .5), 0 0 .8em .5em rgba(255, 78, 1 , .4), 0 0 0 .15em rgba(255, 78, 1, .3);
+  box-shadow: inset 0em 0em 0 .2em rgba(255, 255, 255, .5), 0 0 .8em .5em rgba(255, 78, 1 , .4), 0 0 0 .15em rgba(255, 78, 1, .3);
 
 }
 
 .yinCell .nucleus {
   margin: 1em 0 0 .8em;
-  background-color: rgba(1, 242, 255,1);
+  background-color: rgba(1, 242, 255, 1);
   border: 1px solid rgba(1, 242, 255, .75);
-  box-shadow: inset -.05em -.05em 0 .2em rgba(0, 0, 0, .5), 0 0 .8em .5em rgba(1, 242, 255, .4), 0 0 0 .15em rgba(1, 242, 255, .3);
+  box-shadow: inset 0em 0em 0 .2em rgba(0, 0, 0, .5), 0 0 .8em .5em rgba(1, 242, 255, .4), 0 0 0 .15em rgba(1, 242, 255, .3);
 
 }
+
+.up .nucleus {
+  margin: 3.5em 0 0 1.8em !important;
+}
+
+.down .nucleus {
+  margin: .8em 0 0 1.8em !important;
+}
+
+.right .nucleus {
+  margin: 1.8em 0 0 .8em !important;
+}
+
+.left .nucleus {
+  margin: 1.8em 0 0 3.5em !important;
+}
+
 
 
 .bump {

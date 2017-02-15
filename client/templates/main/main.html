@@ -1,24 +1,35 @@
 <head>
   <title>Tensr</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
   <link href='http://fonts.googleapis.com/css?family=Montserrat|Righteous' rel='stylesheet' type='text/css'>
   <link rel="shortcut icon" href="img/fav.ico">
 </head>
 
-<body>
 
-{{> info team="yin"}}
+<template name="tensr">
 
-{{> field}}
 
-{{#with getMessage}}
-  {{> Template.dynamic template=template}}
-{{/with}}
+  {{> Template.dynamic template=body}}
 
-{{> info team="yang"}}
 
-</body>
+</template>
+
+<template name="game">
+
+  {{> info team="yin"}}
+
+  {{> field}}
+
+  {{#with getMessage}}
+    {{> Template.dynamic template=template}}
+  {{/with}}
+
+  {{> controls}}
+
+  {{> info team="yang"}}
+
+</template>
 
 
 <template name="info">
@@ -27,8 +38,8 @@
   <div class="{{team}} info">
 
     <div class="score"><div class="inner">{{score team}}</div></div>
-    <div class="alive">
-      {{alive team}}<br> <label>Alive</label>
+    <div class="players">
+      {{players team}}<br> <label>Players</label>
     </div>
     <div class="spirits">
       {{getSpirits team}}<br> <label>Spirits</label>
@@ -50,40 +61,35 @@
     </div>
 </template>
 
-<template name="gameOver">
-  <!--Team wins. Pass team name as data. Ask to play again? -->
-
-</template>
-
-<template name="newSpirit">
-  <!--Show this message when a player first joins the game. Unless they are are the only 1 -->
-  <div class="message {{teamName}}Message">
-    <h1>{{getSpirits this.team}}</h1>
-      <p>You are now a spirit for {{teamName}} team in {{teamColor}}.</p>
-
-      <p><em>Your cell will be born when you're in position #1 and an opponent is ready. Quickly choose where to play your cell.
-        Move around the field to stay alive and devour {{opponent}} cells by surrounding them with your team!</em></p>
-      <a href=""><div class="button">Ok, got it!</div></a><br>
-      <a href="http://www.tensr.com#howtoplay" target="_blank">Learn how to play</a>
-  </div>
-</template>
-
-<template name="spirit">
-  <!--Deprecated...Show this message when a player becomes a spirit (other than first time) -->
-  <div class="message {{teamName}}Message">
-    <h1>{{getSpirits this.team}}</h1>
-      <p>Play another cell quickly when it's your turn (and an opponent is ready).</p>
-
-      <a href=""><div class="button">Ok, got it!</div></a><br>
-      <a href="http://www.tensr.com#howtoplay" target="_blank">Learn how to play</a>
-
-  </div>
-</template>
 
 <template name="waiting">
   <!--Show this message when waiting for opponent... -->
   <div class="smallMessage {{teamName}}Message">
-      Waiting for opponent...
+    <div class="closeMessage"><i class="fa fa-times-circle-o"></i></div>
+    {{#if spiritOrder}}
+        Waiting for your turn...
+          <br><a href="" class="share">#{{getSpirits this.team}} spirits</a>
+          <p class="shareUrl">You're a spirit until you play your cell. When one spirit for each team is ready, they play their cells simultaneously.
+
+            <br><br>Share this link to your game and<br> play with all your friends: <br>
+          <a href="{{getUrl}}" class="url">{{getUrl}}</a></p>
+    {{else}}
+
+        Waiting for opponent...
+        <br><a href="" class="share">Don't like waiting?</a>
+
+        <p class="shareUrl">Share this link to your game and<br> play with all your friends: <br>
+        <a href="{{getUrl}}" class="url">{{getUrl}}</a></p>
+    {{/if}}
+
+
+  </div>
+</template>
+
+<template name="growing">
+  <!--Show this message when waiting for opponent... -->
+  <div class="smallMessage {{teamName}}Message">
+      The field is growing!
   </div>
 </template>
 
@@ -92,4 +98,88 @@
   <div class="smallMessage {{teamName}}Message">
       Playing your cell in... {{countdown}}
   </div>
+</template>
+
+<template name="welcome">
+  <!--Show this message when first join the game... -->
+  <div class="message welcome">
+    <div class="mBody">
+      <p>You control a single cell. Devour opponents' cells by surrounding them with your team.</p>
+
+        <div class="choose">
+
+          <h2>Choose your cell:<br> (and team)</h2>
+
+        <div class="selectTeam {{#if getTeam.yin}}not{{/if}}">
+          <div class="cell yangCell"><div class="nucleus"></div></div>
+        </div>
+
+
+        <div class="selectTeam {{#if getTeam.yang}}not{{/if}}">
+          <div class="cell yinCell"><div class="nucleus"></div></div>
+        </div>
+
+        </div>
+        <div style="clear:both"></div>
+        <div class="logo">
+          <img src="/img/logo.svg">
+        </div>
+        <a href="http://www.tensr.com#howtoplay" target="_blank">Learn how to play</a>
+        <!--
+      <ul><h2>How to play:</h2>
+        <li>Choose where to play your cell. Each team plays at the same time.</li>
+        <li>Use the arrow keys or click in the direction you want to move.</li>
+        <li>Drop your cell (by clicking on it) and play a new one at any time.</li></ul>
+      -->
+    </div>
+  </div>
+</template>
+
+<template name="winner">
+  <!--Show this message once both are ready and timer has started... -->
+  <div class="message {{teamName}}Message">
+      <h1>{{teamName}} team wins</h1>
+      <a href=""><div class="button gameMenu">Return to Game Menu</div></a>
+
+  </div>
+</template>
+
+<template name="loser">
+  <!--Show this message once both are ready and timer has started... -->
+  <div class="message {{teamName}}Message">
+    <h1>{{teamName}} team loses</h1>
+    <a href=""><div class="button gameMenu">Return to Game Menu</div></a>
+  </div>
+</template>
+
+<template name="error">
+  <div class="logo-blue">
+      <img src="/img/logo-blue.svg">
+  </div>
+  <div class="error">
+
+        <img src="/img/dove.png" class="dove">
+      <h1>This game... lost in time.</h1>
+      <a href="" class="gameMenu">
+        <h2>Play another</h2>
+      </a>
+  </div>
+</template>
+
+
+<template name="controls">
+<div class="controls">
+
+  <i class="fa fa-search-plus control"></i>
+  <i class="fa fa-search-minus control"></i>
+  <i class="fa fa-tint control"></i>
+  <span class="arrow control">
+  <i class="fa fa-arrow-up control "></i>
+  <i class="fa fa-arrow-down control "></i>
+  <i class="fa fa-arrow-left control "></i>
+  <i class="fa fa-arrow-right control "></i>
+</span>
+  <i class="fa fa-arrows"></i>
+  <div class="gameName"><i class="fa fa-sign-out fa-rotate-180 control"></i> {{gameName}}</div>
+</div>
 </template>

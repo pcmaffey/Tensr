@@ -1,0 +1,68 @@
+.container {
+  width: 100%;
+  text-align: center;
+}
+
+.game {
+  width: 15rem;
+  height: 15rem;
+  margin: 2rem;
+  padding: 1rem;
+  border-radius: .5rem;
+  box-shadow: 0 .3rem 1rem .02rem rgba(0, 0, 0, .3);
+  text-align: left;
+  background-color: rgba(0, 5, 154, .2);
+  cursor: pointer;
+  display: inline-block;
+}
+
+.game:hover, .game:focus {
+  background-color: rgba(0, 5, 154, .4);
+}
+
+.game:active {
+  background-color: rgba(82, 88, 255, .4);
+}
+
+
+.game i {
+    font-size: 150%;
+    margin: 0 .8rem 0 0;
+    float:left;
+}
+
+.insideGame {
+  margin: 2.5rem 0 0 .6rem;
+  height: 10.6rem;
+}
+
+.insideGame em {
+  font-size: 90%;
+}
+
+.insideGame h2 {
+  margin: 0;
+  line-height: 150%;
+}
+
+.games {
+  margin: auto;
+  display: inline-block;
+  min-width: 15rem;
+
+}
+
+.game .cell {
+  font-size: .21rem;
+  float: left;
+  margin-right: .4rem;
+}
+
+.gameScore {
+  font-family: "Righteous", sans-serif;
+  float:left;
+  text-align: left;
+  bottom:0;
+  width: 5rem;
+  line-height: 2.2rem;
+}
